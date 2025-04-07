@@ -8,6 +8,7 @@
     "doctrine/doctrine-bundle": "^2.13",
     "symfony/framework-bundle": "^6.4",
     "symfony/property-access": "^6.4",
+    "tourze/doctrine-entity-checker-bundle": "0.0.*",
     "psr/log": "^3|^2|^1",
     "yiisoft/strings": "^2.1"
   },
