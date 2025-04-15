@@ -6,7 +6,7 @@
     "php": "^8.1",
     "nesbot/carbon": "^2.72 || ^3",
     "doctrine/doctrine-bundle": "^2.13",
-    "doctrine/orm": "^2.17 || ^3.0",
+    "doctrine/orm": "^2.20 || ^3.0",
     "symfony/framework-bundle": "^6.4",
     "symfony/property-access": "^6.4",
     "tourze/doctrine-entity-checker-bundle": "0.0.*",
