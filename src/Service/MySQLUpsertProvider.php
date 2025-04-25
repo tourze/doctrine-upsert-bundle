@@ -123,11 +123,11 @@ class MySQLUpsertProvider implements ProviderInterface
      *
      * @param mixed $attribute The attribute to be escaped.
      *
-     * @return string|int The escaped attribute value, ready for use in a SQL query.
+     * @return string|int|float The escaped attribute value, ready for use in a SQL query.
      *
      * @throws InvalidUpsertArguments If the attribute's data type is not supported for escaping.
      */
-    private function escapeAttribute(mixed $attribute): string|int
+    private function escapeAttribute(mixed $attribute): string|int|float
     {
         return match (strtolower(gettype($attribute))) {
             'integer', 'double' => $attribute,

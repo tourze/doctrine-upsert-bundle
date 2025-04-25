@@ -37,10 +37,24 @@ class UpsertQueryBuilder
         return $this->upsertProvider->getUpsertQuery($table, $insertData, $updateData);
     }
 
-    public function upsertBatchQuery(array $data, string $repositoryClass): string
+    /**
+     * 构建并返回批量upsert查询
+     * 
+     * @param array $data 要插入或更新的数据集
+     * @param string $repositoryClass 实体仓库类名
+     * @return string|null 返回SQL查询字符串，如果数据为空则返回null
+     */
+    public function upsertBatchQuery(array $data, string $repositoryClass): ?string
     {
+        if (empty($data)) {
+            return null;
+        }
+        
         $table = $this->getTableName($repositoryClass);
-        return $this->upsertProvider->getUpsertBatchQuery($data, $table);
+        $result = $this->upsertProvider->getUpsertBatchQuery($data, $table);
+        
+        // 处理可能返回null的情况
+        return $result !== null ? $result : 'SELECT 1';
     }
 
     /**
