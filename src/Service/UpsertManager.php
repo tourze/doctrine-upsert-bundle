@@ -9,6 +9,7 @@ use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Mapping as ORM;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Tourze\DoctrineEntityCheckerBundle\Service\SqlFormatter;
 use Tourze\DoctrineUpsertBundle\Builder\UpsertQueryBuilder;
@@ -21,7 +22,7 @@ class UpsertManager
         private readonly LoggerInterface $logger,
         private readonly EntityManagerInterface $entityManager,
         private readonly ProviderManager $providerManager,
-        private readonly PropertyAccessor $propertyAccessor,
+        #[Autowire(service: 'doctrine-upsert.property-accessor')] private readonly PropertyAccessor $propertyAccessor,
         private readonly Inflector $inflector,
         private readonly SqlFormatter $sqlFormatter,
     )

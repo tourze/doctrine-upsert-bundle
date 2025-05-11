@@ -8,3 +8,7 @@ services:
     resource: '../../Service/'
 
   Yiisoft\Strings\Inflector: ~
+
+  doctrine-upsert.property-accessor:
+    class: Symfony\Component\PropertyAccess\PropertyAccessor
+    factory: [ 'Symfony\Component\PropertyAccess\PropertyAccess', 'createPropertyAccessor' ]
