@@ -4,12 +4,14 @@
 
 ## 简介
 
-doctrine-upsert-bundle 为 Doctrine ORM 提供高效的 UPSERT（插入或更新）能力，支持 MySQL 等主流数据库。通过自动生成 UPSERT SQL，实现实体的高性能批量写入和唯一约束下的数据同步。
+doctrine-upsert-bundle 为 Doctrine ORM 提供高效的 UPSERT（插入或更新）能力，支持 MySQL、SQLite 等主流数据库。通过自动生成 UPSERT SQL，实现实体的高性能批量写入和唯一约束下的数据同步。
 
 ## 功能特性
 
-- 支持单条和批量 UPSERT 操作（INSERT ... ON DUPLICATE KEY UPDATE）
-- 自动识别数据库平台，兼容 MySQL
+- 支持单条和批量 UPSERT 操作
+  - MySQL: INSERT ... ON DUPLICATE KEY UPDATE
+  - SQLite: INSERT ... ON CONFLICT ... DO UPDATE SET
+- 自动识别数据库平台，兼容 MySQL 和 SQLite
 - 自动根据实体唯一约束生成 UPSERT 语句
 - 支持自定义 UPSERT Provider，便于扩展
 - 错误处理友好，避免 EntityManager 关闭
@@ -66,6 +68,9 @@ $upsertManager->executeBatch($data, YourEntity::class);
 ## 配置项说明
 
 - 支持通过实现 ProviderInterface 扩展不同数据库平台的 UPSERT
+- 已支持的数据库平台：
+  - MySQL (MySQLUpsertProvider)
+  - SQLite (SQLiteUpsertProvider)
 - 可自定义唯一约束字段处理逻辑
 
 ## 贡献指南

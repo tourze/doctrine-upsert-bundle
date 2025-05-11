@@ -4,15 +4,17 @@
 
 ## Introduction
 
-doctrine-upsert-bundle provides efficient UPSERT (insert or update) support for Doctrine ORM, compatible with popular databases such as MySQL. It automatically generates UPSERT SQL for high-performance batch writes and data synchronization under unique constraints.
+doctrine-upsert-bundle provides efficient UPSERT (insert or update) capabilities for Doctrine ORM, supporting major databases like MySQL and SQLite. It automatically generates UPSERT SQL to achieve high-performance batch writing and data synchronization under unique constraints.
 
 ## Features
 
-- Supports single and batch UPSERT operations (INSERT ... ON DUPLICATE KEY UPDATE)
-- Auto-detects database platform, compatible with MySQL
-- Automatically generates UPSERT SQL based on entity unique constraints
-- Extensible via custom UPSERT Provider
-- Friendly error handling, prevents EntityManager from closing unexpectedly
+- Support for single and batch UPSERT operations
+  - MySQL: INSERT ... ON DUPLICATE KEY UPDATE
+  - SQLite: INSERT ... ON CONFLICT ... DO UPDATE SET
+- Automatic database platform detection, compatible with MySQL and SQLite
+- Automatic generation of UPSERT statements based on entity unique constraints
+- Support for custom UPSERT Providers for extensibility
+- Friendly error handling, avoiding EntityManager closure
 
 ## Installation
 
@@ -23,7 +25,7 @@ doctrine-upsert-bundle provides efficient UPSERT (insert or update) support for 
 - doctrine/dbal >= 3.7
 - symfony >= 6.4
 
-### Composer
+### Composer Installation
 
 ```bash
 composer require tourze/doctrine-upsert-bundle
@@ -33,7 +35,7 @@ composer require tourze/doctrine-upsert-bundle
 
 ### Configuration
 
-Ensure registration in `config/bundles.php`:
+Make sure to register in `config/bundles.php`:
 
 ```php
 return [
@@ -63,21 +65,24 @@ $data = [
 $upsertManager->executeBatch($data, YourEntity::class);
 ```
 
-## Configuration
+## Configuration Options
 
-- Extend different database platforms by implementing ProviderInterface
-- Custom logic for handling unique constraint fields is supported
+- Support for extending different database platform UPSERTs by implementing ProviderInterface
+- Supported database platforms:
+  - MySQL (MySQLUpsertProvider)
+  - SQLite (SQLiteUpsertProvider)
+- Custom unique constraint field handling logic
 
-## Contributing
+## Contribution Guidelines
 
-- Please describe issues and PRs in detail
+- Describe issues and changes in detail before submitting Issues or PRs
 - Follow PSR-12 coding standards
-- Ensure new features have test coverage
+- Ensure new features have test cases
 
-## License
+## Copyright and License
 
 MIT License © tourze
 
-## Changelog
+## Update Log
 
-See [CHANGELOG.md] or Git history for details.
+See [CHANGELOG.md] or Git history.
