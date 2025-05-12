@@ -3,7 +3,7 @@
 namespace Tourze\DoctrineUpsertBundle\Service;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Platforms\SqlitePlatform;
+use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\ORM\EntityManagerInterface;
 use Tourze\DoctrineUpsertBundle\Exception\InvalidUpsertArguments;
 
@@ -17,7 +17,7 @@ class SQLiteUpsertProvider implements ProviderInterface
 
     public function support(AbstractPlatform $platform): bool
     {
-        return $platform instanceof SqlitePlatform;
+        return $platform instanceof SQLitePlatform;
     }
 
     public function getUpsertQuery(string $tableName, array $insertData, array $updateData = []): string

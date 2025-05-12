@@ -4,7 +4,7 @@ namespace Tourze\DoctrineUpsertBundle\Tests\Service;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
-use Doctrine\DBAL\Platforms\SqlitePlatform;
+use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Tourze\DoctrineUpsertBundle\Exception\InvalidUpsertArguments;
@@ -29,7 +29,7 @@ class SQLiteUpsertProviderTest extends TestCase
 
     public function test_support_SQLite平台_应返回true()
     {
-        $sqlitePlatform = $this->createMock(SqlitePlatform::class);
+        $sqlitePlatform = $this->createMock(SQLitePlatform::class);
         $this->assertTrue($this->provider->support($sqlitePlatform));
     }
 
