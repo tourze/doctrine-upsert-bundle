@@ -130,7 +130,7 @@ class SQLiteUpsertProvider implements ProviderInterface
             'string' => "'" . $this->entityManager->getConnection()->quote($attribute) . "'",
             'array', 'object', 'resource' => throw InvalidUpsertArguments::invalidAttribute(gettype($attribute)),
             'null' => 'NULL',
-            'boolean' => $attribute ? 1 : 0,
+            'boolean' => (bool)$attribute ? 1 : 0,
             default => throw InvalidUpsertArguments::notSupportedAttribute()
         };
     }

@@ -65,10 +65,9 @@ class UpsertManager
         if (empty($uniqueColumns)) {
             foreach ($meta->getReflectionClass()->getProperties(\ReflectionProperty::IS_PRIVATE) as $property) {
                 foreach ($property->getAttributes(ORM\Column::class) as $attribute) {
-                    /** @var \ReflectionAttribute $attribute */
-                    $attribute = $attribute->newInstance();
-                    /** @var ORM\Column $attribute */
-                    if ($attribute->unique) {
+                    /** @var ORM\Column $columnAttribute */
+                    $columnAttribute = $attribute->newInstance();
+                    if ($columnAttribute->unique) {
                         // 只要我们可以查到一个唯一字段，那么就没必要继续了，因为这个就是最终要的唯一字段
                         $uniqueColumns[] = $property->getName();
                         break 2;
