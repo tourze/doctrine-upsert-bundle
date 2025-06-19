@@ -36,7 +36,6 @@ class UpsertManagerIntegrationTest extends TestCase
     private Connection $connection;
     private MySQLUpsertProvider $mysqlProvider;
     private UnitOfWork $unitOfWork;
-    private ClassMetadataFactory $metadataFactory;
 
     protected function setUp(): void
     {
@@ -49,7 +48,6 @@ class UpsertManagerIntegrationTest extends TestCase
         $this->sqlFormatter = $this->createMock(SqlFormatter::class);
         $this->connection = $this->createMock(Connection::class);
         $this->unitOfWork = $this->createMock(UnitOfWork::class);
-        $this->metadataFactory = $this->createMock(ClassMetadataFactory::class);
 
         // 配置EntityManager
         $this->entityManager->method('getConnection')
@@ -84,23 +82,6 @@ class UpsertManagerIntegrationTest extends TestCase
         // 跳过此测试，因为UniqueConstraint是final类，无法模拟
         $this->markTestSkipped('UniqueConstraint是final类，无法使用mock模拟');
 
-        // 1. 创建模拟实体类
-        $entity = new class {
-            #[ORM\Column(unique: true)]
-            private string $email = 'test@example.com';
-
-            private ?int $id = null;
-
-            public function getId(): ?int
-            {
-                return $this->id;
-            }
-
-            public function getEmail(): string
-            {
-                return $this->email;
-            }
-        };
     }
 
     public function test_executeBatch_完整流程()

@@ -26,8 +26,6 @@ class UpsertManagerTest extends TestCase
     private Inflector $inflector;
     private SqlFormatter $sqlFormatter;
     private ClassMetadata $classMetadata;
-    private Connection $connection;
-    private UnitOfWork $unitOfWork;
 
     protected function setUp(): void
     {
@@ -39,8 +37,6 @@ class UpsertManagerTest extends TestCase
         $this->inflector = new Inflector();
         $this->sqlFormatter = $this->createMock(SqlFormatter::class);
         $this->classMetadata = $this->createMock(ClassMetadata::class);
-        $this->connection = $this->createMock(Connection::class);
-        $this->unitOfWork = $this->createMock(UnitOfWork::class);
 
         $this->upsertManager = new UpsertManager(
             $this->logger,
@@ -83,7 +79,7 @@ class UpsertManagerTest extends TestCase
     {
         // 创建一个没有ID和唯一约束的模拟实体
         $entity = new class {
-            public function getId(): ?int
+            public function getId(): null
             {
                 return null;
             }

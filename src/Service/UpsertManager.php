@@ -2,7 +2,7 @@
 
 namespace Tourze\DoctrineUpsertBundle\Service;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\NotSupported;
@@ -93,7 +93,7 @@ class UpsertManager
         unset($updateData['create_time']);
         // NOTICE 这里做一个特殊处理，如果有updateTime的话，那我们这里手动补充一次
         if (method_exists($entity, 'setUpdateTime')) {
-            $updateData['update_time'] = Carbon::now()->toDateTimeString();
+            $updateData['update_time'] = CarbonImmutable::now()->toDateTimeString();
         }
 
         // 执行UPSERT
