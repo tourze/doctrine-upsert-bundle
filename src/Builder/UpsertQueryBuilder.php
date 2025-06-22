@@ -39,7 +39,7 @@ class UpsertQueryBuilder
 
     /**
      * 构建并返回批量upsert查询
-     * 
+     *
      * @param array $data 要插入或更新的数据集
      * @param string $repositoryClass 实体仓库类名
      * @return string|null 返回SQL查询字符串，如果数据为空则返回null
