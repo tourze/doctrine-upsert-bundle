@@ -35,7 +35,7 @@ class InvalidUpsertArgumentsTest extends TestCase
         $this->assertEquals(sprintf('Invalid attribute "%s" for upsert.', $type), $exception->getMessage());
     }
 
-    public function invalidAttributeTypesProvider(): array
+    public static function invalidAttributeTypesProvider(): array
     {
         return [
             'array type' => ['array'],

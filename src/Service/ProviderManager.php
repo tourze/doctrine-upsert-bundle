@@ -8,7 +8,7 @@ use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
 
 class ProviderManager
 {
-    public function __construct(#[TaggedIterator(ProviderInterface::TAG_NAME)] private readonly iterable $providers)
+    public function __construct(#[TaggedIterator(tag: ProviderInterface::TAG_NAME)] private readonly iterable $providers)
     {
     }
 

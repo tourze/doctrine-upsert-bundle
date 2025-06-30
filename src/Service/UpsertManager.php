@@ -13,6 +13,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Tourze\DoctrineEntityCheckerBundle\Service\SqlFormatter;
 use Tourze\DoctrineUpsertBundle\Builder\UpsertQueryBuilder;
+use Tourze\DoctrineUpsertBundle\Exception\UpsertException;
 use Yiisoft\Strings\Inflector;
 
 #[Autoconfigure(lazy: true)]
@@ -82,7 +83,7 @@ class UpsertManager
                 'class' => $className,
                 'entity' => $entity,
             ]);
-            throw new \RuntimeException('实体没有唯一字段约束，不应该使用upsert');
+            throw new UpsertException('实体没有唯一字段约束，不应该使用upsert');
         }
 
         // 生成INSERT时使用的SQL
@@ -115,7 +116,7 @@ class UpsertManager
                             'entity' => $entity,
                             'uniqueColumns' => $uniqueColumns,
                         ]);
-                        throw new \RuntimeException('upsert时无法重新查出数据');
+                        throw new UpsertException('upsert时无法重新查出数据');
                     }
                     $conditions[$fixColumn] = $this->propertyAccessor->getValue($entity, $fixColumn);
                 }

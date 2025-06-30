@@ -112,19 +112,6 @@ class UpsertManagerTest extends TestCase
         $this->upsertManager->upsert($entity);
     }
 
-    public function test_execute_成功执行SQL返回影响行数()
-    {
-        // UpsertManager的providerManager是readonly的，无法直接替换
-        // 我们需要跳过这个测试或者使用另一种方式来测试
-        $this->markTestSkipped('无法修改readonly属性providerManager，跳过测试');
-    }
-
-    public function test_executeBatch_应正确构建批量UPSERT查询并执行()
-    {
-        // UpsertManager的providerManager是readonly的，无法直接替换
-        // 我们需要跳过这个测试或者使用另一种方式来测试
-        $this->markTestSkipped('无法修改readonly属性providerManager，跳过测试');
-    }
 
     public function test_prepareParams_应正确格式化插入和更新参数()
     {

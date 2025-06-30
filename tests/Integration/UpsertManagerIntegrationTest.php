@@ -77,12 +77,6 @@ class UpsertManagerIntegrationTest extends TestCase
         );
     }
 
-    public function test_upsert_完整流程_使用唯一约束()
-    {
-        // 跳过此测试，因为UniqueConstraint是final类，无法模拟
-        $this->markTestSkipped('UniqueConstraint是final类，无法使用mock模拟');
-
-    }
 
     public function test_executeBatch_完整流程()
     {

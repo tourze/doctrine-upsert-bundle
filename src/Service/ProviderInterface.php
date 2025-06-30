@@ -5,7 +5,7 @@ namespace Tourze\DoctrineUpsertBundle\Service;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
-#[AutoconfigureTag(ProviderInterface::TAG_NAME)]
+#[AutoconfigureTag(name: ProviderInterface::TAG_NAME)]
 interface ProviderInterface
 {
     const TAG_NAME = 'doctrine.upsert.sql_provider';

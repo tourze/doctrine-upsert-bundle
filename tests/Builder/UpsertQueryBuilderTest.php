@@ -45,11 +45,6 @@ class UpsertQueryBuilderTest extends TestCase
         $this->queryBuilder = new UpsertQueryBuilder($this->entityManager, $this->providerManager);
     }
 
-    public function test_构造函数_获取数据库平台失败_应抛出NotSupported异常()
-    {
-        // 由于在PHP 8.4环境下测试NotSupported异常有问题，所以跳过此测试
-        $this->markTestSkipped('在PHP 8.4环境中异常类型匹配有问题，跳过此测试');
-    }
 
     public function test_upsertQuery_应调用提供者的getUpsertQuery方法()
     {
