@@ -17,7 +17,7 @@
     "symfony/http-kernel": "^7.3",
     "symfony/property-access": "^7.3",
     "symfony/yaml": "^7.3",
-    "tourze/backtrace-helper": "0.1.*",
+    "tourze/backtrace-helper": "1.*",
     "tourze/bundle-dependency": "1.*",
     "tourze/doctrine-entity-checker-bundle": "~0.0.8",
     "tourze/symfony-dependency-service-loader": "1.*",
