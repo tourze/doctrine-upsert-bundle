@@ -1,23 +1,30 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tourze\DoctrineUpsertBundle\Service;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\ORM\Exception\NotSupported;
-use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
+use Doctrine\DBAL\Platforms\Exception\NotSupported;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
-class ProviderManager
+readonly class ProviderManager
 {
-    public function __construct(#[TaggedIterator(tag: ProviderInterface::TAG_NAME)] private readonly iterable $providers)
+    /**
+     * @param iterable<ProviderInterface> $providers Upsert提供者集合
+     */
+    public function __construct(#[AutowireIterator(tag: ProviderInterface::TAG_NAME)] private iterable $providers)
     {
     }
 
     /**
-     * Get the UpsertProvider for a given database platform.
+     * 获取给定数据库平台的UpsertProvider
      *
-     * @param AbstractPlatform $dbPlatform The name of the database platform class.
-     * @return ProviderInterface The UpsertProvider instance.
-     * @throws NotSupported If the database platform is not supported.
+     * @param AbstractPlatform $dbPlatform 数据库平台类的名称
+     *
+     * @return ProviderInterface UpsertProvider实例
+     *
+     * @throws NotSupported 如果不支持该数据库平台
      */
     public function getProvider(AbstractPlatform $dbPlatform): ProviderInterface
     {
@@ -27,6 +34,6 @@ class ProviderManager
                 return $provider;
             }
         }
-        throw new NotSupported("Upsert is not supported on platform " . get_class($dbPlatform));
+        throw NotSupported::new('Upsert is not supported on platform ' . get_class($dbPlatform));
     }
 }

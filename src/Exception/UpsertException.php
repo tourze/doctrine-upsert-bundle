@@ -1,7 +1,13 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tourze\DoctrineUpsertBundle\Exception;
 
-class UpsertException extends \RuntimeException
+use Tourze\BacktraceHelper\ContextAwareInterface;
+use Tourze\BacktraceHelper\ContextAwareTrait;
+
+class UpsertException extends \RuntimeException implements ContextAwareInterface
 {
+    use ContextAwareTrait;
 }

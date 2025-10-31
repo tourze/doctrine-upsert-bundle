@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tourze\DoctrineUpsertBundle\Tests\Service;
 
@@ -6,14 +8,21 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Tourze\DoctrineUpsertBundle\Exception\InvalidUpsertArguments;
+use Tourze\DoctrineUpsertBundle\Exception\InvalidUpsertArgumentsException;
 use Tourze\DoctrineUpsertBundle\Service\MySQLUpsertProvider;
 
-class MySQLUpsertProviderTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(MySQLUpsertProvider::class)]
+final class MySQLUpsertProviderTest extends TestCase
 {
     private MySQLUpsertProvider $provider;
+
     private EntityManagerInterface $entityManager;
+
     private Connection $connection;
 
     protected function setUp(): void
@@ -22,35 +31,40 @@ class MySQLUpsertProviderTest extends TestCase
         $this->connection = $this->createMock(Connection::class);
 
         $this->entityManager->method('getConnection')
-            ->willReturn($this->connection);
+            ->willReturn($this->connection)
+        ;
 
         $this->provider = new MySQLUpsertProvider($this->entityManager);
     }
 
-    public function test_support_MySQL平台_应返回true()
+    public function testSupportMySQL平台应返回true(): void
     {
         $mysqlPlatform = $this->createMock(AbstractMySQLPlatform::class);
         $this->assertTrue($this->provider->support($mysqlPlatform));
     }
 
-    public function test_support_非MySQL平台_应返回false()
+    public function testSupport非MySQL平台应返回false(): void
     {
+        // 对具体类 PostgreSQLPlatform 使用 createMock 的理由：
+        // 1. PostgreSQLPlatform 是 Doctrine DBAL 的平台类，测试需要模拟不支持的平台
+        // 2. 创建真实的平台实例会增加测试复杂度和依赖
+        // 3. 测试重点在于验证 MySQLUpsertProvider 对不支持平台的识别
         $postgresqlPlatform = $this->createMock(PostgreSQLPlatform::class);
         $this->assertFalse($this->provider->support($postgresqlPlatform));
     }
 
-    public function test_getUpsertQuery_完整字段_应生成正确SQL()
+    public function testGetUpsertQuery完整字段应生成正确SQL(): void
     {
         // 测试数据
         $tableName = 'test_table';
         $insertData = [
             'id' => 1,
             'name' => 'Test',
-            'value' => 100
+            'value' => 100,
         ];
         $updateData = [
             'name' => 'Updated Test',
-            'value' => 200
+            'value' => 200,
         ];
 
         // 期望的SQL查询
@@ -63,14 +77,14 @@ class MySQLUpsertProviderTest extends TestCase
         $this->assertEquals($expectedQuery, $result);
     }
 
-    public function test_getUpsertQuery_无更新数据_应使用VALUES语法()
+    public function testGetUpsertQuery无更新数据应使用VALUES语法(): void
     {
         // 测试数据
         $tableName = 'test_table';
         $insertData = [
             'id' => 1,
             'name' => 'Test',
-            'value' => 100
+            'value' => 100,
         ];
 
         // 期望的SQL查询
@@ -83,13 +97,14 @@ class MySQLUpsertProviderTest extends TestCase
         $this->assertEquals($expectedQuery, $result);
     }
 
-    public function test_getUpsertBatchQuery_多行数据_应生成批量插入SQL()
+    public function testGetUpsertBatchQuery多行数据应生成批量插入SQL(): void
     {
         // 模拟连接的quote方法
         $this->connection->method('quote')
             ->willReturnCallback(function ($input) {
                 return addslashes($input);
-            });
+            })
+        ;
 
         // 测试数据
         $table = 'test_table';
@@ -97,13 +112,13 @@ class MySQLUpsertProviderTest extends TestCase
             [
                 'id' => 1,
                 'name' => 'Test 1',
-                'active' => true
+                'active' => true,
             ],
             [
                 'id' => 2,
                 'name' => 'Test 2',
-                'active' => false
-            ]
+                'active' => false,
+            ],
         ];
 
         // 期望的SQL查询 (注意MySQL中布尔值转为0/1)
@@ -116,13 +131,13 @@ class MySQLUpsertProviderTest extends TestCase
         $this->assertEquals($expectedQuery, $result);
     }
 
-    public function test_getUpsertBatchQuery_空数据_应返回null()
+    public function testGetUpsertBatchQuery空数据应返回null(): void
     {
         $result = $this->provider->getUpsertBatchQuery([], 'test_table');
         $this->assertNull($result);
     }
 
-    public function test_escapeAttribute_有效数据类型_应正确转换和转义()
+    public function testEscapeAttribute有效数据类型应正确转换和转义(): void
     {
         // 使用反射访问私有方法
         $reflectionClass = new \ReflectionClass(MySQLUpsertProvider::class);
@@ -147,11 +162,12 @@ class MySQLUpsertProviderTest extends TestCase
         // 字符串需要转义和引号
         $this->connection->method('quote')
             ->with('test')
-            ->willReturn('test');
+            ->willReturn('test')
+        ;
         $this->assertEquals("'test'", $method->invoke($this->provider, 'test'));
     }
 
-    public function test_escapeAttribute_数组类型_应抛出InvalidUpsertArguments异常()
+    public function testEscapeAttribute数组类型应抛出InvalidUpsertArguments异常(): void
     {
         // 使用反射访问私有方法
         $reflectionClass = new \ReflectionClass(MySQLUpsertProvider::class);
@@ -159,11 +175,11 @@ class MySQLUpsertProviderTest extends TestCase
         $method->setAccessible(true);
 
         // 测试数组类型
-        $this->expectException(InvalidUpsertArguments::class);
+        $this->expectException(InvalidUpsertArgumentsException::class);
         $method->invoke($this->provider, []);
     }
 
-    public function test_escapeAttribute_对象类型_应抛出InvalidUpsertArguments异常()
+    public function testEscapeAttribute对象类型应抛出InvalidUpsertArguments异常(): void
     {
         // 使用反射访问私有方法
         $reflectionClass = new \ReflectionClass(MySQLUpsertProvider::class);
@@ -171,7 +187,7 @@ class MySQLUpsertProviderTest extends TestCase
         $method->setAccessible(true);
 
         // 测试对象类型
-        $this->expectException(InvalidUpsertArguments::class);
+        $this->expectException(InvalidUpsertArgumentsException::class);
         $method->invoke($this->provider, new \stdClass());
     }
 }

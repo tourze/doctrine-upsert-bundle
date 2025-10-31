@@ -1,18 +1,19 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tourze\DoctrineUpsertBundle\Service;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\ORM\EntityManagerInterface;
-use Tourze\DoctrineUpsertBundle\Exception\InvalidUpsertArguments;
+use Tourze\DoctrineUpsertBundle\Exception\InvalidUpsertArgumentsException;
 
-class SQLiteUpsertProvider implements ProviderInterface
+readonly class SQLiteUpsertProvider implements ProviderInterface
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-    )
-    {
+        private EntityManagerInterface $entityManager,
+    ) {
     }
 
     public function support(AbstractPlatform $platform): bool
@@ -20,30 +21,30 @@ class SQLiteUpsertProvider implements ProviderInterface
         return $platform instanceof SQLitePlatform;
     }
 
-    public function getUpsertQuery(string $tableName, array $insertData, array $updateData = []): string
+    public function getUpsertQuery(string $tableName, array $insertData, array $updateData = [], array $uniqueColumns = []): string
     {
         $columns = array_keys($insertData);
-        $placeholders = array_map(fn($column) => ':q0_' . $column, $columns);
+        $placeholders = array_map(fn ($column) => ':q0_' . $column, $columns);
 
         $insertColumns = implode(', ', $columns);
         $insertValues = implode(', ', $placeholders);
 
-        // 对于SQLite，我们需要明确指定冲突键
-        // 我们使用第一个列作为冲突检测列（通常是主键或唯一键）
-        $conflictColumn = $columns[0];
-        
-        if (empty($updateData)) {
+        // 使用传入的唯一约束列，如果为空则回退到第一列（向后兼容）
+        $conflictColumns = [] === $uniqueColumns ? [$columns[0]] : $uniqueColumns;
+        $conflictPart = implode(', ', $conflictColumns);
+
+        if ([] === $updateData) {
             // 如果没指定更新时的操作字段，那我们就自动生成
             $updatePart = implode(', ', array_map(
-                fn($column) => $column . ' = excluded.' . $column, 
-                array_filter($columns, fn($col) => $col !== $conflictColumn)
+                fn ($column) => $column . ' = excluded.' . $column,
+                array_filter($columns, fn ($col) => !in_array($col, $conflictColumns, true))
             ));
         } else {
             // 否则用传入的数据
             $updatePart = [];
             foreach ($updateData as $column => $value) {
-                if ($column !== $conflictColumn) {
-                    $updatePart[] = "$column = :q1_$column";
+                if (!in_array($column, $conflictColumns, true)) {
+                    $updatePart[] = "{$column} = :q1_{$column}";
                 }
             }
             $updatePart = implode(', ', $updatePart);
@@ -54,26 +55,26 @@ class SQLiteUpsertProvider implements ProviderInterface
             $tableName,
             $insertColumns,
             $insertValues,
-            $conflictColumn,
+            $conflictPart,
             $updatePart
         );
     }
 
     /**
-     * Get SQL query string for UPSERT operations on SQLite.
+     * 获取用于SQLite上UPSERT操作的SQL查询字符串
      *
-     * @param array $data The data rows to be upserted.
-     *                    Each row should be an associative array where the key is the column name.
-     * @param string $table The name of the table into which the data will be upserted.
+     * @param array<array<string, mixed>> $data  要进行upsert的数据行。
+     *                                           每一行都应该是一个关联数组，其中键是列名。
+     * @param string                      $table 要进行upsert的表名
      *
-     * @return string|null The SQL query string for the UPSERT operation,
-     *                     or null if the input data array is empty.
+     * @return string|null 用于UPSERT操作的SQL查询字符串，
+     *                     如果输入数据数组为空则返回null
      *
-     * @throws InvalidUpsertArguments If there are invalid attributes in the data array.
+     * @throws InvalidUpsertArgumentsException 如果数据数组中存在无效属性
      */
     public function getUpsertBatchQuery(array $data, string $table): ?string
     {
-        if (empty($data)) {
+        if ([] === $data) {
             return null;
         }
 
@@ -84,11 +85,11 @@ class SQLiteUpsertProvider implements ProviderInterface
         // 对于SQLite，我们需要明确指定冲突键
         // 我们使用第一个列作为冲突检测列（通常是主键或唯一键）
         $conflictColumn = $columns[0];
-        
+
         $updateClausule = implode(
             ', ', array_map(
-                fn($column) => $column . ' = excluded.' . $column, 
-                array_filter($columns, fn($col) => $col !== $conflictColumn)
+                fn ($column) => $column . ' = excluded.' . $column,
+                array_filter($columns, fn ($col) => $col !== $conflictColumn)
             )
         );
 
@@ -117,21 +118,21 @@ class SQLiteUpsertProvider implements ProviderInterface
      * 此方法根据数据类型准备属性以在SQL查询中使用。
      * 转义后的值可以是字符串、整数或NULL关键字的字符串表示。
      *
-     * @param mixed $attribute 要转义的属性。
+     * @param mixed $attribute 要转义的属性
      *
-     * @return string|int|float 准备用于SQL查询的转义属性值。
+     * @return string|int|float 准备用于SQL查询的转义属性值
      *
-     * @throws InvalidUpsertArguments 如果属性的数据类型不支持转义。
+     * @throws InvalidUpsertArgumentsException 如果属性的数据类型不支持转义
      */
     private function escapeAttribute(mixed $attribute): string|int|float
     {
         return match (strtolower(gettype($attribute))) {
             'integer', 'double' => $attribute,
             'string' => "'" . $this->entityManager->getConnection()->quote($attribute) . "'",
-            'array', 'object', 'resource' => throw InvalidUpsertArguments::invalidAttribute(gettype($attribute)),
+            'array', 'object', 'resource' => throw InvalidUpsertArgumentsException::invalidAttribute(gettype($attribute)),
             'null' => 'NULL',
-            'boolean' => (bool)$attribute ? 1 : 0,
-            default => throw InvalidUpsertArguments::notSupportedAttribute()
+            'boolean' => (bool) $attribute ? 1 : 0,
+            default => throw InvalidUpsertArgumentsException::notSupportedAttribute(),
         };
     }
 }

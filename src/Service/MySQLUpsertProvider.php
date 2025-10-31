@@ -1,18 +1,19 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tourze\DoctrineUpsertBundle\Service;
 
 use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\ORM\EntityManagerInterface;
-use Tourze\DoctrineUpsertBundle\Exception\InvalidUpsertArguments;
+use Tourze\DoctrineUpsertBundle\Exception\InvalidUpsertArgumentsException;
 
-class MySQLUpsertProvider implements ProviderInterface
+readonly class MySQLUpsertProvider implements ProviderInterface
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-    )
-    {
+        private EntityManagerInterface $entityManager,
+    ) {
     }
 
     public function support(AbstractPlatform $platform): bool
@@ -20,22 +21,22 @@ class MySQLUpsertProvider implements ProviderInterface
         return $platform instanceof AbstractMySQLPlatform;
     }
 
-    public function getUpsertQuery(string $tableName, array $insertData, array $updateData = []): string
+    public function getUpsertQuery(string $tableName, array $insertData, array $updateData = [], array $uniqueColumns = []): string
     {
         $columns = array_keys($insertData);
-        $placeholders = array_map(fn($column) => ':q0_' . $column, $columns);
+        $placeholders = array_map(fn ($column) => ':q0_' . $column, $columns);
 
         $insertColumns = implode(', ', $columns);
         $insertValues = implode(', ', $placeholders);
 
-        if (empty($updateData)) {
+        if ([] === $updateData) {
             // 如果没指定更新时的操作字段，那我们就自动生成
-            $updatePart = implode(', ', array_map(fn($column) => $column . ' = VALUES(' . $column . ')', $columns));
+            $updatePart = implode(', ', array_map(fn ($column) => $column . ' = VALUES(' . $column . ')', $columns));
         } else {
             // 否则用传入的数据
             $updatePart = [];
             foreach ($updateData as $column => $value) {
-                $updatePart[] = "$column = :q1_$column";
+                $updatePart[] = "{$column} = :q1_{$column}";
             }
             $updatePart = implode(', ', $updatePart);
         }
@@ -50,18 +51,18 @@ class MySQLUpsertProvider implements ProviderInterface
     }
 
     /**
-     * Get SQL query string for UPSERT (INSERT ... ON DUPLICATE KEY UPDATE) operations.
+     * 获取用于UPSERT操作的SQL查询字符串（INSERT ... ON DUPLICATE KEY UPDATE）
      *
-     * @param array $data The data rows to be upserted.
-     *                    Each row should be an associative array where the key is the column name.
-     * @param string $table The name of the table into which the data will be upserted.
+     * @param array<array<string, mixed>> $data  要进行upsert的数据行。
+     *                                           每一行都应该是一个关联数组，其中键是列名。
+     * @param string                      $table 要进行upsert的表名
      *
-     * @return string|null The SQL query string for the UPSERT operation,
-     *                     or null if the input data array is empty.
+     * @return string|null 用于UPSERT操作的SQL查询字符串，
+     *                     如果输入数据数组为空则返回null
      *
-     * @throws InvalidUpsertArguments If there are invalid attributes in the data array.
+     * @throws InvalidUpsertArgumentsException 如果数据数组中存在无效属性
      *
-     * @example
+     * 示例
      *   $this->upsertBatchQuery([
      *       [
      *           'id' => 1,
@@ -75,33 +76,33 @@ class MySQLUpsertProvider implements ProviderInterface
      *       ],
      *   ], entity::class);
      *
-     *  This would try to insert two rows in 'entity table name'. If rows with the same unique id already exist,
-     *  it would update 'column1' and 'column2' for these rows.
+     *  这将尝试在"entity table name"中插入两行。如果具有相同唯一id的行已存在，
+     *  将为这些行更新'column1'和'column2'。
      */
     public function getUpsertBatchQuery(array $data, string $table): ?string
     {
-        if (empty($data)) {
+        if ([] === $data) {
             return null;
         }
 
         $columns = array_keys($data[0]);
-        $placeholders = array_map(fn($column) => ':' . $column, $columns);
+        $placeholders = array_map(fn ($column) => ':' . $column, $columns);
         $insertColumns = implode(', ', $columns);
         $insertValues = [];
 
         $updateClausule = implode(
-            ', ', array_map(fn($column) => $column . ' = VALUES(' . $column . ')', $columns)
+            ', ', array_map(fn ($column) => $column . ' = VALUES(' . $column . ')', $columns)
         );
 
         foreach ($data as $attributes) {
             $inClausule = implode(
                 separator: ', ',
                 array: array_map(
-                    fn($placeholder) => $this->escapeAttribute($attributes[substr($placeholder, 1)]),
+                    fn ($placeholder) => $this->escapeAttribute($attributes[substr($placeholder, 1)]),
                     $placeholders
                 )
             );
-            $insertValues[] = "($inClausule)";
+            $insertValues[] = "({$inClausule})";
         }
 
         // Sestavíme a provedeme dotaz pro všechny řádky
@@ -115,27 +116,26 @@ class MySQLUpsertProvider implements ProviderInterface
     }
 
     /**
-     * Escape an attribute for SQL queries.
+     * 为SQL查询转义属性
      *
-     * This method prepares an attribute for use in a SQL query by escaping it
-     * based on its data type. The escaped value is either a string, an integer, or
-     * a string representation of the NULL keyword.
+     * 此方法根据数据类型对属性进行转义，以便在SQL查询中使用。
+     * 转义后的值可以是字符串、整数或NULL关键字的字符串表示。
      *
-     * @param mixed $attribute The attribute to be escaped.
+     * @param mixed $attribute 要转义的属性
      *
-     * @return string|int|float The escaped attribute value, ready for use in a SQL query.
+     * @return string|int|float 转义后的属性值，可用于SQL查询
      *
-     * @throws InvalidUpsertArguments If the attribute's data type is not supported for escaping.
+     * @throws InvalidUpsertArgumentsException 如果属性的数据类型不支持转义
      */
     private function escapeAttribute(mixed $attribute): string|int|float
     {
         return match (strtolower(gettype($attribute))) {
             'integer', 'double' => $attribute,
             'string' => "'" . $this->entityManager->getConnection()->quote($attribute) . "'",
-            'array', 'object', 'resource' => throw InvalidUpsertArguments::invalidAttribute(gettype($attribute)),
+            'array', 'object', 'resource' => throw InvalidUpsertArgumentsException::invalidAttribute(gettype($attribute)),
             'null' => 'NULL',
-            'boolean' => (bool)$attribute ? 1 : 0,
-            default => throw InvalidUpsertArguments::notSupportedAttribute()
+            'boolean' => (bool) $attribute ? 1 : 0,
+            default => throw InvalidUpsertArgumentsException::notSupportedAttribute(),
         };
     }
 }

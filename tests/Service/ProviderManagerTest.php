@@ -1,18 +1,27 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tourze\DoctrineUpsertBundle\Tests\Service;
 
 use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
+use Doctrine\DBAL\Platforms\Exception\NotSupported;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
-use Doctrine\ORM\Exception\NotSupported;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tourze\DoctrineUpsertBundle\Service\ProviderInterface;
 use Tourze\DoctrineUpsertBundle\Service\ProviderManager;
 
-class ProviderManagerTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(ProviderManager::class)]
+final class ProviderManagerTest extends TestCase
 {
     private ProviderManager $providerManager;
-    private iterable $providers;
+
+    /** @var array<ProviderInterface> */
+    private array $providers;
 
     protected function setUp(): void
     {
@@ -21,13 +30,14 @@ class ProviderManagerTest extends TestCase
         $mysqlProvider->method('support')
             ->willReturnCallback(function ($platform) {
                 return $platform instanceof AbstractMySQLPlatform;
-            });
+            })
+        ;
 
         $this->providers = [$mysqlProvider];
         $this->providerManager = new ProviderManager($this->providers);
     }
 
-    public function test_getProvider_支持的平台_应返回对应提供者()
+    public function testGetProvider支持的平台应返回对应提供者(): void
     {
         // 创建MySQL平台实例
         $mysqlPlatform = $this->createMock(AbstractMySQLPlatform::class);
@@ -39,9 +49,13 @@ class ProviderManagerTest extends TestCase
         $this->assertSame($this->providers[0], $provider);
     }
 
-    public function test_getProvider_不支持的平台_应抛出NotSupported异常()
+    public function testGetProvider不支持的平台应抛出NotSupported异常(): void
     {
         // 创建PostgreSQL平台实例（不支持）
+        // 对具体类 PostgreSQLPlatform 使用 createMock 的理由：
+        // 1. PostgreSQLPlatform 是 Doctrine DBAL 的平台类，测试需要模拟不支持的平台
+        // 2. 创建真实的平台实例会增加测试复杂度和依赖
+        // 3. 测试重点在于验证 ProviderManager 对不支持平台的异常处理
         $postgresPlatform = $this->createMock(PostgreSQLPlatform::class);
 
         // 期望抛出异常
@@ -52,20 +66,27 @@ class ProviderManagerTest extends TestCase
         $this->providerManager->getProvider($postgresPlatform);
     }
 
-    public function test_getProvider_多个提供者_应返回第一个匹配的提供者()
+    public function testGetProvider多个提供者应返回第一个匹配的提供者(): void
     {
+        // 这个测试需要验证多个提供者的场景，由于这是一个功能性测试，
+        // 直接实例化 ProviderManager 是合理的，因为它测试的是核心逻辑
+        // 而不是容器配置
+
         // 创建多个模拟提供者
         $provider1 = $this->createMock(ProviderInterface::class);
         $provider1->method('support')
-            ->willReturn(false);
+            ->willReturn(false)
+        ;
 
         $provider2 = $this->createMock(ProviderInterface::class);
         $provider2->method('support')
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
 
         $provider3 = $this->createMock(ProviderInterface::class);
         $provider3->method('support')
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
 
         // 重新创建带有多个提供者的管理器
         $providerManager = new ProviderManager([$provider1, $provider2, $provider3]);

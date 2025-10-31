@@ -2,14 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Tourze\DoctrineUpsertBundle\Tests\Unit\Exception;
+namespace Tourze\DoctrineUpsertBundle\Tests\Exception;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Tourze\DoctrineUpsertBundle\Exception\UpsertException;
+use Tourze\PHPUnitBase\AbstractExceptionTestCase;
 
-class UpsertExceptionTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(UpsertException::class)]
+final class UpsertExceptionTest extends AbstractExceptionTestCase
 {
-    public function test_异常可以正确创建和抛出(): void
+    protected function onSetUp(): void
+    {
+        // 可以在这里添加自定义的初始化逻辑
+    }
+
+    public function test异常可以正确创建和抛出(): void
     {
         $message = 'Upsert operation failed';
         $code = 500;
@@ -24,7 +34,7 @@ class UpsertExceptionTest extends TestCase
         $this->assertSame($previous, $exception->getPrevious());
     }
 
-    public function test_异常可以被捕获(): void
+    public function test异常可以被捕获(): void
     {
         $this->expectException(UpsertException::class);
         $this->expectExceptionMessage('Test exception');

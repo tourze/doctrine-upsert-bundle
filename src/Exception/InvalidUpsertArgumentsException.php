@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tourze\DoctrineUpsertBundle\Exception;
 
-class InvalidUpsertArguments extends \Exception
+class InvalidUpsertArgumentsException extends \Exception
 {
     public static function notSupportedAttribute(): self
     {
