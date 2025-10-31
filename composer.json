@@ -19,7 +19,7 @@
     "symfony/yaml": "^7.3",
     "tourze/backtrace-helper": "1.*",
     "tourze/bundle-dependency": "1.*",
-    "tourze/doctrine-entity-checker-bundle": "~0.0.8",
+    "tourze/doctrine-entity-checker-bundle": "1.0.*",
     "tourze/symfony-dependency-service-loader": "1.*",
     "yiisoft/strings": "^2.1"
   },
@@ -27,7 +27,7 @@
     "phpstan/phpstan": "^2.1",
     "phpunit/phpunit": "^11.5",
     "tourze/phpunit-base": "1.*",
-    "tourze/phpunit-symfony-kernel-test": "1.*",
+    "tourze/phpunit-symfony-kernel-test": "1.0.*",
     "tourze/phpunit-symfony-unit-test": "1.*"
   },
   "autoload": {
