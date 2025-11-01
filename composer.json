@@ -20,7 +20,7 @@
     "tourze/backtrace-helper": "1.*",
     "tourze/bundle-dependency": "1.*",
     "tourze/doctrine-entity-checker-bundle": "1.0.*",
-    "tourze/symfony-dependency-service-loader": "1.*",
+    "tourze/symfony-dependency-service-loader": "1.0.*",
     "yiisoft/strings": "^2.1"
   },
   "require-dev": {
